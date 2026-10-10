@@ -1,0 +1,31 @@
+:root {
+  color: #f3efe4;
+  background: #14140f;
+  font-family: "Segoe UI", sans-serif;
+  line-height: 1.5;
+}
+body { margin: 0; }
+main { max-width: 880px; margin: 0 auto; padding: 32px 16px 64px; }
+h1 { font-size: 40px; margin: 0; font-weight: 650; }
+h2 { margin: 0 0 8px; font-size: 22px; }
+.kicker { color: #d6b36a; font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.lead, .note { color: #b4ad9c; }
+.panel { background: #1e1e16; border: 1px solid #3a382c; border-radius: 16px; padding: 16px; margin: 16px 0; }
+label { display: block; font-weight: 600; margin-top: 12px; }
+textarea, input[type="text"], input[type="file"] {
+  width: 100%; box-sizing: border-box; margin-top: 6px;
+  background: #14140f; color: #f3efe4; border: 1px solid #3a382c; border-radius: 12px; padding: 10px;
+}
+button { margin-top: 16px; min-height: 44px; border: 0; border-radius: 999px; padding: 0 18px; background: #d6b36a; color: #2a220f; font-weight: 700; cursor: pointer; }
+.row { display: grid; gap: 12px; }
+@media (min-width: 720px) { .row { grid-template-columns: 1.4fr 1fr; } }
+.violation { background: #3a241e; }
+.lawful { background: #1d2c22; }
+.manual, .insufficient { background: #332c18; }
+.bad { background: #3a241e; }
+.choice { font-weight: 500; }
+fieldset { border: 1px solid #3a382c; border-radius: 12px; margin-top: 12px; }
+.cases { display: grid; gap: 8px; }
+.case { width: 100%; text-align: left; background: #1e1e16; color: #f3efe4; border: 1px solid #3a382c; border-radius: 12px; }
+.case small { display: block; color: #b4ad9c; font-weight: 400; }
+ul { padding-left: 18px; }

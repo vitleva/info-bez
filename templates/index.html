@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Разбор тайны</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <main>
+    <header>
+      <p class="kicker">Служба режима</p>
+      <h1>Разбор тайны</h1>
+      <p class="lead">Текст, файл с диска или загрузка. Вывод по объекту, получателю и основанию. Инциденты пишутся в security_log.txt.</p>
+    </header>
+
+    <form method="post" enctype="multipart/form-data" class="panel">
+      <label for="text">Текст</label>
+      <textarea id="text" name="text" rows="8">{{ text }}</textarea>
+
+      <div class="row">
+        <label class="grow">Путь к файлу на этом компьютере
+          <input type="text" name="path" placeholder="C:\docs\letter.txt">
+        </label>
+        <label>Или выбрать файл
+          <input type="file" name="upload" accept=".txt,.md,.csv,.log,text/plain">
+        </label>
+      </div>
+
+      {% if result and result.questions %}
+        {% set q = result.questions[0] %}
+        <fieldset>
+          <legend>{{ q.prompt }}</legend>
+          {% for value, label in q.options %}
+            <label class="choice"><input type="radio" name="{{ q.id }}" value="{{ value }}" required> {{ label }}</label>
+          {% endfor %}
+        </fieldset>
+      {% endif %}
+
+      <button type="submit">Разобрать</button>
+    </form>
+
+    {% if error %}
+      <section class="panel bad"><h2>Ошибка</h2><p>{{ error }}</p></section>
+    {% endif %}
+
+    {% if result %}
+      <section class="panel {{ result.status }}">
+        <p class="kicker">{{ result.status }}</p>
+        <h2>{{ result.headline }}</h2>
+        <p>{{ result.detail }}</p>
+        {% if result.approximate %}<p class="note">{{ result.approximate }} Дальше только ручная проверка, без новых вопросов.</p>{% endif %}
+        <p>Действие: <strong>{{ result.action }}</strong></p>
+        {% if result.laws|length > 1 %}
+          <p>Одновременно затронуты несколько законов: {{ result.laws|join('; ') }}.</p>
+        {% endif %}
+        <ul>
+          {% for item in result.findings %}
+            <li><strong>{{ item.law }}</strong>, {{ item.article }}. {{ item.why }}</li>
+          {% endfor %}
+        </ul>
+        {% if source %}<p class="note">Источник: {{ source }}</p>{% endif %}
+      </section>
+      {% if result.facts.signals %}
+        <section class="panel">
+          <h2>Что увидела логика</h2>
+          <ul>{% for line in result.facts.signals %}<li>{{ line }}</li>{% endfor %}</ul>
+        </section>
+      {% endif %}
+    {% endif %}
+
+    <section>
+      <h2>Учебные тексты</h2>
+      <div class="cases">
+        {% for sample in samples %}
+          <form method="post">
+            <input type="hidden" name="sample" value="{{ sample.id }}">
+            <button type="submit" class="case">
+              <span>#{{ sample.id }} {{ sample.title }}</span>
+              <small>{{ sample.text }}</small>
+            </button>
+          </form>
+        {% endfor %}
+      </div>
+    </section>
+  </main>
+</body>
+</html>
