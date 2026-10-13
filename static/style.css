@@ -16,7 +16,8 @@ textarea, input[type="text"], input[type="file"] {
   width: 100%; box-sizing: border-box; margin-top: 6px;
   background: #14140f; color: #f3efe4; border: 1px solid #3a382c; border-radius: 12px; padding: 10px;
 }
-button { margin-top: 16px; min-height: 44px; border: 0; border-radius: 999px; padding: 0 18px; background: #d6b36a; color: #2a220f; font-weight: 700; cursor: pointer; }
+button.ghost { background: transparent; color: #f3efe4; border: 1px solid #3a382c; margin-left: 8px; }
+.confirm { margin-top: 8px; }
 .row { display: grid; gap: 12px; }
 @media (min-width: 720px) { .row { grid-template-columns: 1.4fr 1fr; } }
 .violation { background: #3a241e; }

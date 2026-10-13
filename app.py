@@ -1,7 +1,8 @@
-# Веб-форма на Flask. Запуск: python app.py
+from pathlib import Path
+
 from flask import Flask, render_template, request
 
-from analyzer import SAMPLES, analyze, log_incident, read_text_file
+from analyzer import SAMPLES, analyze, apply_action, log_incident, log_user_action, read_text_file
 
 app = Flask(__name__)
 
@@ -19,20 +20,44 @@ def answers_from_form() -> dict:
 def index():
     error = None
     result = None
+    applied = None
     text = request.form.get("text", "") if request.method == "POST" else ""
     source = ""
-    if request.method == "POST":
+    path_value = request.form.get("path", "").strip() if request.method == "POST" else ""
+    if request.method == "POST" and request.form.get("confirm_action"):
+        try:
+            action = request.form.get("confirm_action", "").strip()
+            if action not in {"удалить", "заменить", "ничего не делать"}:
+                raise ValueError("Неизвестное действие.")
+            if not str(text).strip():
+                raise ValueError("Пустой текст. Подтверждать нечего.")
+            new_text, phrase = apply_action(text, action)
+            file_note = ""
+            if path_value:
+                try:
+                    Path(path_value).write_text(new_text, encoding="utf-8")
+                    file_note = f" Файл на диске обновлен: {path_value}."
+                except OSError as exc:
+                    file_note = f" Файл на диске не изменен: {exc}."
+            log_user_action(phrase + file_note)
+            text = "" if action == "удалить" else new_text
+            applied = phrase + file_note
+            path_value = ""
+        except ValueError as exc:
+            error = str(exc)
+        except OSError as exc:
+            error = f"Не удалось записать результат: {exc}"
+    elif request.method == "POST":
         try:
             sample_id = request.form.get("sample", "").strip()
-            path = request.form.get("path", "").strip()
             upload = request.files.get("upload")
             if sample_id:
                 chosen = next(item for item in SAMPLES if str(item["id"]) == sample_id)
                 text = chosen["text"]
                 source = chosen["title"]
-            elif path:
-                text = read_text_file(path)
-                source = path
+            elif path_value:
+                text = read_text_file(path_value)
+                source = path_value
             elif upload and upload.filename:
                 raw = upload.read()
                 if not raw:
@@ -56,7 +81,16 @@ def index():
             error = "Такого учебного примера нет."
         except OSError as exc:
             error = f"Не удалось прочитать файл: {exc}"
-    return render_template("index.html", error=error, result=result, text=text, source=source, samples=SAMPLES)
+    return render_template(
+        "index.html",
+        error=error,
+        result=result,
+        text=text,
+        source=source,
+        samples=SAMPLES,
+        applied=applied,
+        path_value=path_value,
+    )
 
 
 if __name__ == "__main__":

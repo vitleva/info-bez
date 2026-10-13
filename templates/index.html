@@ -20,7 +20,7 @@
 
       <div class="row">
         <label class="grow">Путь к файлу на этом компьютере
-          <input type="text" name="path" placeholder="C:\docs\letter.txt">
+          <input type="text" name="path" value="{{ path_value }}" placeholder="C:\docs\letter.txt">
         </label>
         <label>Или выбрать файл
           <input type="file" name="upload" accept=".txt,.md,.csv,.log,text/plain">
@@ -40,6 +40,9 @@
       <button type="submit">Разобрать</button>
     </form>
 
+    {% if applied %}
+      <section class="panel lawful"><h2>Действие выполнено</h2><p>{{ applied }}</p></section>
+    {% endif %}
     {% if error %}
       <section class="panel bad"><h2>Ошибка</h2><p>{{ error }}</p></section>
     {% endif %}
@@ -51,6 +54,20 @@
         <p>{{ result.detail }}</p>
         {% if result.approximate %}<p class="note">{{ result.approximate }} Дальше только ручная проверка, без новых вопросов.</p>{% endif %}
         <p>Действие: <strong>{{ result.action }}</strong></p>
+        {% if result.action in ['удалить', 'заменить', 'ничего не делать'] %}
+          <form method="post" class="confirm">
+            <input type="hidden" name="text" value="{{ text }}">
+            <input type="hidden" name="path" value="{{ path_value }}">
+            {% if result.action == 'удалить' %}
+              <button type="submit" name="confirm_action" value="удалить">Подтвердить: удалить</button>
+              <button type="submit" name="confirm_action" value="заменить" class="ghost">Заменить (маскировать)</button>
+            {% elif result.action == 'заменить' %}
+              <button type="submit" name="confirm_action" value="заменить">Подтвердить: маскировать</button>
+            {% else %}
+              <button type="submit" name="confirm_action" value="ничего не делать">Подтвердить: ничего не делать</button>
+            {% endif %}
+          </form>
+        {% endif %}
         {% if result.laws|length > 1 %}
           <p>Одновременно затронуты несколько законов: {{ result.laws|join('; ') }}.</p>
         {% endif %}

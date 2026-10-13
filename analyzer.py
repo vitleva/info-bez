@@ -1,6 +1,3 @@
-# Разбор тайны по сочетанию фактов, а не по точному ключевому слову.
-# Основа слова ловит падеж: «пусковую» и «пусковая» это один признак.
-
 import re
 from datetime import datetime
 from pathlib import Path
@@ -476,13 +473,32 @@ def log_incident(raw: str, result: dict) -> None:
     kinds = ", ".join(result["laws"]) if result["laws"] else result["headline"]
     stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     block = (
-        "============================================================\n"
         f"Дата: {stamp}\n"
         f"Тип: {kinds}\n"
         f"Статус: {result['status']}\n"
         f"Действие: {result['action']}\n"
         f"Текст: {result['masked']}\n"
-        "============================================================\n\n"
+    )
+    with LOG_PATH.open("a", encoding="utf-8") as handle:
+        handle.write(block)
+
+
+def apply_action(raw: str, action: str) -> tuple[str, str]:
+    """Возвращает новый текст и фразу для журнала. Само действие делает только после подтверждения."""
+    shown = mask_text(raw)
+    if action == "удалить":
+        return "[сообщение удалено]", f"Сообщение было удалено: {shown}"
+    if action == "заменить":
+        masked = mask_text(raw)
+        return masked, f"Сообщение было замаскировано: {shown}"
+    return raw, f"Сообщение оставлено без изменений: {shown}"
+
+
+def log_user_action(phrase: str) -> None:
+    stamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    block = (
+        f"Дата: {stamp}\n"
+        f"Решение пользователя: {phrase}\n"
     )
     with LOG_PATH.open("a", encoding="utf-8") as handle:
         handle.write(block)
